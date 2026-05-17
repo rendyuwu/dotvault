@@ -102,11 +102,11 @@ T8|x|build Generate page mock flow: selector, count, preview table, stats|I.rout
 T9|x|build dot-pattern generator unit tests before backend integration|V10,V11,V16
 T10|x|build copy single + copy all preview actions|V22
 T11|x|build Save Aliases mock flow with skipped/saved result states|V12,V13,V15,V24
-T12|.|build Aliases list with search/filter/copy/link-provider entry UI|I.route,V17,V19,V22,V24
-T13|.|build Alias detail UI with notes, archive, linked providers|I.route,V17,V19,V21,V24
-T14|.|build Providers list/create/edit/archive UI|I.route,V20,V21,V24
-T15|.|build Provider detail UI with linked aliases + link alias action|I.route,V17,V20,V21,V24
-T16|.|build Alias-Provider link UI with duplicate-link prevention state|I.route,V17,V18,V21,V24
+T12|x|build Aliases list with search/filter/copy/link-provider entry UI|I.route,V17,V19,V22,V24
+T13|x|build Alias detail UI with notes, archive, linked providers|I.route,V17,V19,V21,V24
+T14|x|build Providers list/create/edit/archive UI|I.route,V20,V21,V24
+T15|x|build Provider detail UI with linked aliases + link alias action|I.route,V17,V20,V21,V24
+T16|x|build Alias-Provider link UI with duplicate-link prevention state|I.route,V17,V18,V21,V24
 T17|.|build Settings page with app info + acceptable-use policy + change-password placeholder|I.route,V23
 T18|.|verify mock frontend golden paths in browser|V24
 T19|.|add Docker Compose app/postgres baseline bound localhost|I.file

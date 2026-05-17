@@ -31,6 +31,10 @@ interface GmailAccountsContextValue {
     id: string,
     data: Partial<Pick<GmailAccount, "label" | "notes">>
   ) => void;
+  updateAlias: (
+    id: string,
+    data: Partial<Pick<DotAlias, "notes" | "archived">>
+  ) => void;
   archiveAccount: (id: string) => void;
   isDuplicate: (canonicalEmail: string) => boolean;
 }
@@ -148,6 +152,19 @@ export function GmailAccountsProvider({
     [userId]
   );
 
+  const updateAlias = useCallback(
+    (id: string, data: Partial<Pick<DotAlias, "notes" | "archived">>) => {
+      setAliases((prev) =>
+        prev.map((a) =>
+          a.id === id && a.userId === userId
+            ? { ...a, ...data, updatedAt: new Date().toISOString() }
+            : a
+        )
+      );
+    },
+    [userId]
+  );
+
   const archiveAccount = useCallback(
     (id: string) => {
       setAccounts((prev) =>
@@ -169,6 +186,7 @@ export function GmailAccountsProvider({
         addAccount,
         addAliases,
         updateAccount,
+        updateAlias,
         archiveAccount,
         isDuplicate,
       }}
