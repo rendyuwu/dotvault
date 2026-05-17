@@ -93,9 +93,9 @@ V25: Backend integration ! preserve frontend behavior proven in mock phase.
 id|status|task|cites
 T1|x|scaffold Next.js app shell, routing, layout, nav|I.route,V24
 T2|x|create mock data model fixtures for users, Gmail accounts, aliases, providers, links|V24
-T3|.|build login page mock flow, no registration UI|I.route,V2,V24
-T4|.|build protected dashboard layout mock guard|V1,V24
-T5|.|build dashboard summary cards + quick actions from mock data|I.route,V24
+T3|x|build login page mock flow, no registration UI|I.route,V2,V24
+T4|x|build protected dashboard layout mock guard|V1,V24
+T5|x|build dashboard summary cards + quick actions from mock data|I.route,V24
 T6|.|build Gmail Accounts list/new/edit/archive UI with mock data|I.route,V6,V7,V8,V9,V19,V24
 T7|.|build Gmail normalization client helper + UI validation states|V6,V7,V8
 T8|.|build Generate page mock flow: selector, count, preview table, stats|I.route,V10,V11,V12,V15,V16,V24

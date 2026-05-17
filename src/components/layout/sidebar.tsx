@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   Mail,
@@ -13,6 +13,7 @@ import {
   LogOut,
 } from "lucide-react";
 import { useSidebar } from "@/hooks/use-sidebar";
+import { useAuth } from "@/lib/auth/auth-context";
 import { SidebarHeader } from "./sidebar-header";
 import { SidebarNavItem } from "./sidebar-nav-item";
 
@@ -27,11 +28,18 @@ const navItems = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const { isCollapsed, toggle } = useSidebar();
+  const { logout } = useAuth();
 
   function isActive(path: string) {
     if (path === "/dashboard") return pathname === "/dashboard";
     return pathname.startsWith(path);
+  }
+
+  function handleLogout() {
+    logout();
+    router.replace("/login");
   }
 
   return (
@@ -58,9 +66,9 @@ export function Sidebar() {
         <SidebarNavItem
           label="Logout"
           icon={LogOut}
-          path="/login"
           active={false}
           collapsed={isCollapsed}
+          onClick={handleLogout}
         />
         <button
           onClick={toggle}
