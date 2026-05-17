@@ -107,8 +107,8 @@ T13|x|build Alias detail UI with notes, archive, linked providers|I.route,V17,V1
 T14|x|build Providers list/create/edit/archive UI|I.route,V20,V21,V24
 T15|x|build Provider detail UI with linked aliases + link alias action|I.route,V17,V20,V21,V24
 T16|x|build Alias-Provider link UI with duplicate-link prevention state|I.route,V17,V18,V21,V24
-T17|.|build Settings page with app info + acceptable-use policy + change-password placeholder|I.route,V23
-T18|.|verify mock frontend golden paths in browser|V24
+T17|x|build Settings page with app info + acceptable-use policy + change-password placeholder|I.route,V23
+T18|x|verify mock frontend golden paths in browser|V24
 T19|.|add Docker Compose app/postgres baseline bound localhost|I.file
 T20|.|choose ORM/migrations, create schema for users/accounts/aliases/providers/links|I.db,V8,V14,V18
 T21|.|implement auth backend login/logout/session + protected routes|I.action,V1,V2,V3,V4,V5
