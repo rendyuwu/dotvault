@@ -4,8 +4,8 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
-  useState,
+  useMemo,
+  useSyncExternalStore,
 } from "react";
 import type { User } from "@/lib/types";
 import { validateCredentials } from "./mock-credentials";
@@ -28,6 +28,23 @@ function parseStoredUser(raw: string | null): User | null {
   return null;
 }
 
+function readStoredAuth(): string {
+  return localStorage.getItem(STORAGE_KEY) ?? "";
+}
+
+function emitAuthChange() {
+  window.dispatchEvent(new Event("dotvault-auth-change"));
+}
+
+function subscribeToAuthChange(onStoreChange: () => void) {
+  window.addEventListener("dotvault-auth-change", onStoreChange);
+  window.addEventListener("storage", onStoreChange);
+  return () => {
+    window.removeEventListener("dotvault-auth-change", onStoreChange);
+    window.removeEventListener("storage", onStoreChange);
+  };
+}
+
 interface AuthContextValue {
   user: User | null;
   isLoading: boolean;
@@ -38,38 +55,27 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    const parsed = parseStoredUser(stored);
-    if (parsed) {
-      setUser(parsed);
-    } else if (stored) {
-      localStorage.removeItem(STORAGE_KEY);
-    }
-    setIsLoading(false);
-  }, []);
+  const storedAuth = useSyncExternalStore(subscribeToAuthChange, readStoredAuth, () => "");
+  const user = useMemo(() => parseStoredUser(storedAuth), [storedAuth]);
 
   const login = useCallback(
     async (email: string, password: string): Promise<boolean> => {
       const result = validateCredentials(email, password);
       if (!result) return false;
-      setUser(result);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(result));
+      emitAuthChange();
       return true;
     },
     []
   );
 
   const logout = useCallback(() => {
-    setUser(null);
     localStorage.removeItem(STORAGE_KEY);
+    emitAuthChange();
   }, []);
 
   return (
-    <AuthContext value={{ user, isLoading, login, logout }}>
+    <AuthContext value={{ user, isLoading: false, login, logout }}>
       {children}
     </AuthContext>
   );
