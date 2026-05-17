@@ -26,6 +26,7 @@ interface GmailAccountsContextValue {
   accounts: GmailAccount[];
   aliases: DotAlias[];
   addAccount: (data: AddAccountData) => GmailAccount;
+  addAliases: (newAliases: DotAlias[]) => { saved: number; skipped: number };
   updateAccount: (
     id: string,
     data: Partial<Pick<GmailAccount, "label" | "notes">>
@@ -64,6 +65,32 @@ export function GmailAccountsProvider({
       );
     },
     [accounts, userId]
+  );
+
+  const addAliases = useCallback(
+    (newAliases: DotAlias[]): { saved: number; skipped: number } => {
+      let saved = 0;
+      let skipped = 0;
+      const toAdd: DotAlias[] = [];
+      setAliases((prev) => {
+        for (const alias of newAliases) {
+          const exists = prev.some(
+            (a) =>
+              a.gmailAccountId === alias.gmailAccountId &&
+              a.aliasEmail === alias.aliasEmail
+          );
+          if (exists) {
+            skipped++;
+          } else {
+            toAdd.push(alias);
+            saved++;
+          }
+        }
+        return toAdd.length > 0 ? [...prev, ...toAdd] : prev;
+      });
+      return { saved, skipped };
+    },
+    []
   );
 
   const addAccount = useCallback(
@@ -140,6 +167,7 @@ export function GmailAccountsProvider({
         accounts: userAccounts,
         aliases: userAliases,
         addAccount,
+        addAliases,
         updateAccount,
         archiveAccount,
         isDuplicate,

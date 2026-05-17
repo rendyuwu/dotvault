@@ -98,10 +98,10 @@ T4|x|build protected dashboard layout mock guard|V1,V24
 T5|x|build dashboard summary cards + quick actions from mock data|I.route,V24
 T6|x|build Gmail Accounts list/new/edit/archive UI with mock data|I.route,V6,V7,V8,V9,V19,V24
 T7|x|build Gmail normalization client helper + UI validation states|V6,V7,V8
-T8|.|build Generate page mock flow: selector, count, preview table, stats|I.route,V10,V11,V12,V15,V16,V24
-T9|.|build dot-pattern generator unit tests before backend integration|V10,V11,V16
-T10|.|build copy single + copy all preview actions|V22
-T11|.|build Save Aliases mock flow with skipped/saved result states|V12,V13,V15,V24
+T8|x|build Generate page mock flow: selector, count, preview table, stats|I.route,V10,V11,V12,V15,V16,V24
+T9|x|build dot-pattern generator unit tests before backend integration|V10,V11,V16
+T10|x|build copy single + copy all preview actions|V22
+T11|x|build Save Aliases mock flow with skipped/saved result states|V12,V13,V15,V24
 T12|.|build Aliases list with search/filter/copy/link-provider entry UI|I.route,V17,V19,V22,V24
 T13|.|build Alias detail UI with notes, archive, linked providers|I.route,V17,V19,V21,V24
 T14|.|build Providers list/create/edit/archive UI|I.route,V20,V21,V24
