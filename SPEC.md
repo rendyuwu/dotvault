@@ -91,8 +91,8 @@ V25: Backend integration ! preserve frontend behavior proven in mock phase.
 
 ## §T TASKS
 id|status|task|cites
-T1|.|scaffold Next.js app shell, routing, layout, nav|I.route,V24
-T2|.|create mock data model fixtures for users, Gmail accounts, aliases, providers, links|V24
+T1|x|scaffold Next.js app shell, routing, layout, nav|I.route,V24
+T2|x|create mock data model fixtures for users, Gmail accounts, aliases, providers, links|V24
 T3|.|build login page mock flow, no registration UI|I.route,V2,V24
 T4|.|build protected dashboard layout mock guard|V1,V24
 T5|.|build dashboard summary cards + quick actions from mock data|I.route,V24

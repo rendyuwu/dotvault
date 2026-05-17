@@ -1,0 +1,43 @@
+import type { GmailAccount } from "@/lib/types";
+
+export const mockGmailAccounts: GmailAccount[] = [
+  {
+    id: "gma-001",
+    userId: "usr-001",
+    originalEmail: "ren.di.wijaya@gmail.com",
+    canonicalEmail: "rendiwijaya@gmail.com",
+    localPart: "rendiwijaya",
+    domain: "gmail.com",
+    label: "Personal",
+    notes: null,
+    archived: false,
+    createdAt: "2025-01-15T09:00:00Z",
+    updatedAt: "2025-01-15T09:00:00Z",
+  },
+  {
+    id: "gma-002",
+    userId: "usr-001",
+    originalEmail: "john.smith@gmail.com",
+    canonicalEmail: "johnsmith@gmail.com",
+    localPart: "johnsmith",
+    domain: "gmail.com",
+    label: "Work",
+    notes: "Used for professional signups",
+    archived: false,
+    createdAt: "2025-01-16T10:00:00Z",
+    updatedAt: "2025-01-16T10:00:00Z",
+  },
+  {
+    id: "gma-003",
+    userId: "usr-001",
+    originalEmail: "test.account@gmail.com",
+    canonicalEmail: "testaccount@gmail.com",
+    localPart: "testaccount",
+    domain: "gmail.com",
+    label: "Testing",
+    notes: "Throwaway signups",
+    archived: false,
+    createdAt: "2025-02-01T12:00:00Z",
+    updatedAt: "2025-02-01T12:00:00Z",
+  },
+];
