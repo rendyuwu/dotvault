@@ -6,9 +6,10 @@ test("preserves integrated backend golden path", async ({ page }) => {
 
   await page.getByRole("link", { name: "Gmail Accounts", exact: true }).click();
   await page.getByRole("link", { name: "Add Account" }).first().click();
-  await page.getByLabel("Gmail Address").fill(" A.Bcde@gmail.com ");
-  await page.getByLabel("Label").fill("E2E Gmail");
-  await page.getByLabel(/Notes/).fill("E2E Gmail notes");
+  await expect(page.getByRole("heading", { name: "Add Gmail Account" })).toBeVisible();
+  await page.getByLabel("Gmail Address").pressSequentially(" A.Bcde@gmail.com ");
+  await page.getByLabel("Label").pressSequentially("E2E Gmail");
+  await page.getByLabel(/Notes/).pressSequentially("E2E Gmail notes");
   await expect(page.getByText("Canonical:")).toBeVisible();
   await expect(page.getByText("abcde@gmail.com")).toBeVisible();
   await page.getByRole("button", { name: "Add Account" }).click();

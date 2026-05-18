@@ -64,6 +64,18 @@ export function assertSafeE2eReset(env: Record<string, string | undefined>) {
     throw new Error("E2E reset requires valid DATABASE_URL");
   }
 
+  if (parsed.hostname !== "127.0.0.1" && parsed.hostname !== "localhost") {
+    throw new Error("E2E reset requires local DATABASE_URL host");
+  }
+
+  if (parsed.port !== "55433") {
+    throw new Error("E2E reset requires DATABASE_URL port 55433");
+  }
+
+  if (parsed.username !== "dotvault_e2e") {
+    throw new Error("E2E reset requires DATABASE_URL user dotvault_e2e");
+  }
+
   if (parsed.pathname !== `/${E2E_DB_NAME}`) {
     throw new Error("E2E reset requires DATABASE_URL database dotvault_e2e");
   }
@@ -93,7 +105,9 @@ export async function resetE2eDatabase(env: Record<string, string | undefined>) 
   }
 }
 
-export const e2eAdmin = {
-  email: DEFAULT_E2E_ENV.BOOTSTRAP_ADMIN_EMAIL,
-  password: DEFAULT_E2E_ENV.BOOTSTRAP_ADMIN_PASSWORD,
-};
+export function getE2eAdmin(env: Record<string, string | undefined> = loadE2eEnv()) {
+  return {
+    email: env.BOOTSTRAP_ADMIN_EMAIL ?? DEFAULT_E2E_ENV.BOOTSTRAP_ADMIN_EMAIL,
+    password: env.BOOTSTRAP_ADMIN_PASSWORD ?? DEFAULT_E2E_ENV.BOOTSTRAP_ADMIN_PASSWORD,
+  };
+}

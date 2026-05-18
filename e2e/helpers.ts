@@ -1,7 +1,7 @@
 import { expect, type Page } from "@playwright/test";
-import { e2eAdmin } from "../src/lib/e2e/setup";
+import { getE2eAdmin } from "../src/lib/e2e/setup";
 
-export const admin = e2eAdmin;
+export const admin = getE2eAdmin();
 
 export async function login(page: Page) {
   await page.goto("/login");

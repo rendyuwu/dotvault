@@ -26,6 +26,7 @@
 .DS_Store
 *.pem
 PRD.md
+/backups
 
 # debug
 npm-debug.log*
