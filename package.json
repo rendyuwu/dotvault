@@ -8,6 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest",
+    "test:e2e": "playwright test",
+    "e2e:env": "tsx scripts/ensure-e2e-env.ts",
     "admin:bootstrap": "NODE_OPTIONS='--conditions=react-server' tsx scripts/bootstrap-admin.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate"
@@ -26,6 +28,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

@@ -123,7 +123,7 @@ T29|x|implement change password if feasible; else mark high-priority post-MVP in
 T30|x|add server/client validation coverage for all forms|V5,V6,V7,V13,V18
 T31|x|add database concurrency/uniqueness tests for aliases + links|V14,V18
 T32|x|add deployment env sample + backup docs|I.env,I.file
-T33|.|run full browser verification against integrated backend|V25
+T33|x|run full browser verification against integrated backend|V25
 
 ## §B BUGS
 id|date|cause|fix
