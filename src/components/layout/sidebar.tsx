@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   Mail,
@@ -12,8 +12,8 @@ import {
   PanelLeftOpen,
   LogOut,
 } from "lucide-react";
+import { logoutAction } from "@/lib/auth/actions";
 import { useSidebar } from "@/hooks/use-sidebar";
-import { useAuth } from "@/lib/auth/auth-context";
 import { SidebarHeader } from "./sidebar-header";
 import { SidebarNavItem } from "./sidebar-nav-item";
 
@@ -28,18 +28,11 @@ const navItems = [
 
 export function Sidebar() {
   const pathname = usePathname();
-  const router = useRouter();
   const { isCollapsed, toggle } = useSidebar();
-  const { logout } = useAuth();
 
   function isActive(path: string) {
     if (path === "/dashboard") return pathname === "/dashboard";
     return pathname.startsWith(path);
-  }
-
-  function handleLogout() {
-    logout();
-    router.replace("/login");
   }
 
   return (
@@ -63,13 +56,16 @@ export function Sidebar() {
       </nav>
 
       <div className="flex flex-col gap-1 px-2 py-3 border-t border-[var(--color-border)]">
-        <SidebarNavItem
-          label="Logout"
-          icon={LogOut}
-          active={false}
-          collapsed={isCollapsed}
-          onClick={handleLogout}
-        />
+        <form action={logoutAction}>
+          <button
+            type="submit"
+            title={isCollapsed ? "Logout" : undefined}
+            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors w-full text-[var(--color-text-dim)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-text)]"
+          >
+            <LogOut size={18} className="shrink-0" />
+            {!isCollapsed && <span>Logout</span>}
+          </button>
+        </form>
         <button
           onClick={toggle}
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}

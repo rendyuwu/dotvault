@@ -8,10 +8,11 @@ import {
   useState,
 } from "react";
 import { useAuth } from "@/lib/auth/auth-context";
-import { mockGmailAccounts } from "@/lib/mock-data/gmail-accounts";
 import { mockAliases } from "@/lib/mock-data/aliases";
-import type { GmailAccount } from "@/lib/types/gmail-account";
+import { mockGmailAccounts } from "@/lib/mock-data/gmail-accounts";
+import { mockUsers } from "@/lib/mock-data/users";
 import type { DotAlias } from "@/lib/types/alias";
+import type { GmailAccount } from "@/lib/types/gmail-account";
 
 interface AddAccountData {
   originalEmail: string;
@@ -43,6 +44,8 @@ const GmailAccountsContext = createContext<GmailAccountsContextValue | null>(
   null
 );
 
+const mockOwnerId = mockUsers[0]?.id;
+
 export function GmailAccountsProvider({
   children,
 }: {
@@ -53,22 +56,39 @@ export function GmailAccountsProvider({
   const [aliases, setAliases] = useState<DotAlias[]>(mockAliases);
 
   const userId = user?.id;
+  const ownsRecord = useCallback(
+    (recordUserId: string) => {
+      return Boolean(userId && (recordUserId === userId || recordUserId === mockOwnerId));
+    },
+    [userId]
+  );
+  const mapAccountOwner = useCallback(
+    (account: GmailAccount): GmailAccount =>
+      userId && account.userId === mockOwnerId ? { ...account, userId } : account,
+    [userId]
+  );
+  const mapAliasOwner = useCallback(
+    (alias: DotAlias): DotAlias =>
+      userId && alias.userId === mockOwnerId ? { ...alias, userId } : alias,
+    [userId]
+  );
+
   const userAccounts = useMemo(
-    () => accounts.filter((a) => a.userId === userId),
-    [accounts, userId]
+    () => accounts.filter((a) => ownsRecord(a.userId)).map(mapAccountOwner),
+    [accounts, ownsRecord, mapAccountOwner]
   );
   const userAliases = useMemo(
-    () => aliases.filter((a) => a.userId === userId),
-    [aliases, userId]
+    () => aliases.filter((a) => ownsRecord(a.userId)).map(mapAliasOwner),
+    [aliases, ownsRecord, mapAliasOwner]
   );
 
   const isDuplicate = useCallback(
     (canonicalEmail: string) => {
       return accounts.some(
-        (a) => a.userId === userId && a.canonicalEmail === canonicalEmail
+        (a) => ownsRecord(a.userId) && a.canonicalEmail === canonicalEmail
       );
     },
-    [accounts, userId]
+    [accounts, ownsRecord]
   );
 
   const addAliases = useCallback(
@@ -143,39 +163,39 @@ export function GmailAccountsProvider({
     (id: string, data: Partial<Pick<GmailAccount, "label" | "notes">>) => {
       setAccounts((prev) =>
         prev.map((a) =>
-          a.id === id && a.userId === userId
+          a.id === id && ownsRecord(a.userId)
             ? { ...a, ...data, updatedAt: new Date().toISOString() }
             : a
         )
       );
     },
-    [userId]
+    [ownsRecord]
   );
 
   const updateAlias = useCallback(
     (id: string, data: Partial<Pick<DotAlias, "notes" | "archived">>) => {
       setAliases((prev) =>
         prev.map((a) =>
-          a.id === id && a.userId === userId
+          a.id === id && ownsRecord(a.userId)
             ? { ...a, ...data, updatedAt: new Date().toISOString() }
             : a
         )
       );
     },
-    [userId]
+    [ownsRecord]
   );
 
   const archiveAccount = useCallback(
     (id: string) => {
       setAccounts((prev) =>
         prev.map((a) =>
-          a.id === id && a.userId === userId
+          a.id === id && ownsRecord(a.userId)
             ? { ...a, archived: true, updatedAt: new Date().toISOString() }
             : a
         )
       );
     },
-    [userId]
+    [ownsRecord]
   );
 
   return (

@@ -8,10 +8,12 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest",
+    "admin:bootstrap": "NODE_OPTIONS='--conditions=react-server' tsx scripts/bootstrap-admin.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate"
   },
   "dependencies": {
+    "@node-rs/argon2": "^2.0.2",
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.45.2",
     "geist": "^1.7.0",
@@ -19,7 +21,9 @@
     "next": "16.2.6",
     "postgres": "^3.4.9",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "server-only": "^0.0.1",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -31,6 +35,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
     "tailwindcss": "^4",
+    "tsx": "^4.22.1",
     "typescript": "^5",
     "vite-tsconfig-paths": "^6.1.1",
     "vitest": "^4.1.6"

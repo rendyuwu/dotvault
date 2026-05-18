@@ -8,10 +8,11 @@ import {
   useState,
 } from "react";
 import { useAuth } from "@/lib/auth/auth-context";
-import { mockProviders } from "@/lib/mock-data/providers";
 import { mockAliasProviderLinks } from "@/lib/mock-data/alias-provider-links";
-import type { Provider } from "@/lib/types/provider";
+import { mockProviders } from "@/lib/mock-data/providers";
+import { mockUsers } from "@/lib/mock-data/users";
 import type { AliasProviderLink } from "@/lib/types/alias-provider-link";
+import type { Provider } from "@/lib/types/provider";
 
 interface AddProviderData {
   name: string;
@@ -49,6 +50,7 @@ interface ProvidersContextValue {
 }
 
 const ProvidersContext = createContext<ProvidersContextValue | null>(null);
+const mockOwnerId = mockUsers[0]?.id;
 
 export function ProvidersProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
@@ -58,13 +60,30 @@ export function ProvidersProvider({ children }: { children: React.ReactNode }) {
   );
 
   const userId = user?.id;
+  const ownsRecord = useCallback(
+    (recordUserId: string) => {
+      return Boolean(userId && (recordUserId === userId || recordUserId === mockOwnerId));
+    },
+    [userId]
+  );
+  const mapProviderOwner = useCallback(
+    (provider: Provider): Provider =>
+      userId && provider.userId === mockOwnerId ? { ...provider, userId } : provider,
+    [userId]
+  );
+  const mapLinkOwner = useCallback(
+    (link: AliasProviderLink): AliasProviderLink =>
+      userId && link.userId === mockOwnerId ? { ...link, userId } : link,
+    [userId]
+  );
+
   const userProviders = useMemo(
-    () => providers.filter((p) => p.userId === userId),
-    [providers, userId]
+    () => providers.filter((p) => ownsRecord(p.userId)).map(mapProviderOwner),
+    [providers, ownsRecord, mapProviderOwner]
   );
   const userLinks = useMemo(
-    () => links.filter((l) => l.userId === userId),
-    [links, userId]
+    () => links.filter((l) => ownsRecord(l.userId)).map(mapLinkOwner),
+    [links, ownsRecord, mapLinkOwner]
   );
 
   const isDuplicateLink = useCallback(
@@ -117,26 +136,26 @@ export function ProvidersProvider({ children }: { children: React.ReactNode }) {
     ) => {
       setProviders((prev) =>
         prev.map((p) =>
-          p.id === id && p.userId === userId
+          p.id === id && ownsRecord(p.userId)
             ? { ...p, ...data, updatedAt: new Date().toISOString() }
             : p
         )
       );
     },
-    [userId]
+    [ownsRecord]
   );
 
   const archiveProvider = useCallback(
     (id: string) => {
       setProviders((prev) =>
         prev.map((p) =>
-          p.id === id && p.userId === userId
+          p.id === id && ownsRecord(p.userId)
             ? { ...p, archived: true, updatedAt: new Date().toISOString() }
             : p
         )
       );
     },
-    [userId]
+    [ownsRecord]
   );
 
   const addLink = useCallback(
@@ -168,26 +187,26 @@ export function ProvidersProvider({ children }: { children: React.ReactNode }) {
     ) => {
       setLinks((prev) =>
         prev.map((l) =>
-          l.id === id && l.userId === userId
+          l.id === id && ownsRecord(l.userId)
             ? { ...l, ...data, updatedAt: new Date().toISOString() }
             : l
         )
       );
     },
-    [userId]
+    [ownsRecord]
   );
 
   const archiveLink = useCallback(
     (id: string) => {
       setLinks((prev) =>
         prev.map((l) =>
-          l.id === id && l.userId === userId
+          l.id === id && ownsRecord(l.userId)
             ? { ...l, archived: true, updatedAt: new Date().toISOString() }
             : l
         )
       );
     },
-    [userId]
+    [ownsRecord]
   );
 
   const getLinksForAlias = useCallback(

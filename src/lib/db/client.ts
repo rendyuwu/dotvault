@@ -1,22 +1,31 @@
+import "server-only";
+
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
+import { getDatabaseUrl } from "../env";
 import * as schema from "./schema";
-
-const databaseUrl = process.env.DATABASE_URL;
-
-if (!databaseUrl) {
-  throw new Error("DATABASE_URL is required");
-}
 
 const globalForDb = globalThis as typeof globalThis & {
   dotvaultPostgres?: postgres.Sql;
 };
 
-const sql = globalForDb.dotvaultPostgres ?? postgres(databaseUrl);
+export function getDbClient() {
+  const existingClient = globalForDb.dotvaultPostgres;
+  if (existingClient) return existingClient;
 
-if (process.env.NODE_ENV !== "production") {
-  globalForDb.dotvaultPostgres = sql;
+  const client = postgres(getDatabaseUrl());
+  globalForDb.dotvaultPostgres = client;
+
+  return client;
 }
 
-export const db = drizzle(sql, { schema });
-export { sql as dbClient };
+export function getDb() {
+  return drizzle(getDbClient(), { schema });
+}
+
+export async function closeDbClient() {
+  const client = globalForDb.dotvaultPostgres;
+  if (!client) return;
+  await client.end();
+  globalForDb.dotvaultPostgres = undefined;
+}

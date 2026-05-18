@@ -135,7 +135,7 @@ export default function SettingsPage() {
           </div>
           <div className="flex items-center justify-between pt-1">
             <p className="text-xs italic text-[var(--color-muted)]">
-              Available when backend authentication is implemented.
+              Available when change password is implemented.
             </p>
             <Button variant="primary" disabled>
               Update Password
