@@ -114,8 +114,8 @@ T20|x|choose ORM/migrations, create schema for users/accounts/aliases/providers/
 T21|x|implement auth backend login/logout/session + protected routes|I.action,V1,V2,V3,V4,V5
 T22|x|implement admin seed/CLI/env bootstrap; no public signup|I.script,V2,V3
 T23|x|integrate Gmail account backend actions + original alias transaction|I.action,V6,V7,V8,V9
-T24|.|integrate generation preview backend with saved-alias skipping + stats|I.action,V10,V11,V12,V15,V16
-T25|.|integrate save preview backend with ownership + uniqueness recheck|I.action,V13,V14
+T24|x|integrate generation preview backend with saved-alias skipping + stats|I.action,V10,V11,V12,V15,V16
+T25|x|integrate save preview backend with ownership + uniqueness recheck|I.action,V13,V14
 T26|.|integrate alias search/filter/detail/notes/archive backend|I.action,V17,V19,V21,V22,V25
 T27|.|integrate provider CRUD/detail/archive backend|I.action,V17,V19,V20,V21,V25
 T28|.|integrate alias-provider link create/update/archive backend|I.action,V17,V18,V21,V25
