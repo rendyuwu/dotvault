@@ -119,9 +119,9 @@ T25|x|integrate save preview backend with ownership + uniqueness recheck|I.actio
 T26|x|integrate alias search/filter/detail/notes/archive backend|I.action,V17,V19,V21,V22,V25
 T27|x|integrate provider CRUD/detail/archive backend|I.action,V17,V19,V20,V21,V25
 T28|x|integrate alias-provider link create/update/archive backend|I.action,V17,V18,V21,V25
-T29|.|implement change password if feasible; else mark high-priority post-MVP in settings|I.action,V3
-T30|.|add server/client validation coverage for all forms|V5,V6,V7,V13,V18
-T31|.|add database concurrency/uniqueness tests for aliases + links|V14,V18
+T29|x|implement change password if feasible; else mark high-priority post-MVP in settings|I.action,V3
+T30|x|add server/client validation coverage for all forms|V5,V6,V7,V13,V18
+T31|x|add database concurrency/uniqueness tests for aliases + links|V14,V18
 T32|.|add deployment env sample + backup docs|I.env,I.file
 T33|.|run full browser verification against integrated backend|V25
 

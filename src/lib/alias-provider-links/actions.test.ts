@@ -133,6 +133,12 @@ function createUpdateDb(existing: unknown[], updated: unknown[]) {
   };
 }
 
+function createRejectingTransactionDb(error: unknown) {
+  return {
+    transaction: vi.fn().mockRejectedValue(error),
+  };
+}
+
 describe("alias provider link actions", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -201,6 +207,36 @@ describe("alias provider link actions", () => {
     await expect(createAliasProviderLinkAction({ aliasId, providerId })).resolves.toEqual({
       error: "This alias is already linked to this provider",
     });
+  });
+
+  it("rejects invalid link identifiers before DB access", async () => {
+    await expect(
+      createAliasProviderLinkAction({ aliasId: "bad-id", providerId })
+    ).resolves.toEqual({ error: expect.any(String) });
+
+    expect(mocks.getDbMock).not.toHaveBeenCalled();
+  });
+
+  it("maps link unique constraint races to duplicate errors", async () => {
+    const db = createRejectingTransactionDb({
+      code: "23505",
+      constraint_name: "alias_provider_links_user_alias_provider_unique",
+    });
+    mocks.getDbMock.mockReturnValue(db);
+
+    await expect(createAliasProviderLinkAction({ aliasId, providerId })).resolves.toEqual({
+      error: "This alias is already linked to this provider",
+    });
+  });
+
+  it("rejects unauthenticated link creation before DB access", async () => {
+    mocks.requireUserForActionMock.mockRejectedValue(new Error("Unauthorized"));
+
+    await expect(createAliasProviderLinkAction({ aliasId, providerId })).rejects.toThrow(
+      "Unauthorized"
+    );
+
+    expect(mocks.getDbMock).not.toHaveBeenCalled();
   });
 
   it("restores archived duplicate links and updates metadata", async () => {

@@ -192,6 +192,24 @@ describe("alias actions", () => {
     expect(mocks.revalidatePathMock).toHaveBeenCalledWith(`/aliases/${aliasId}`);
   });
 
+  it("rejects invalid alias update identifiers before DB access", async () => {
+    await expect(updateAliasAction({ id: "bad-id", archived: true })).resolves.toEqual({
+      error: expect.any(String),
+    });
+
+    expect(mocks.getDbMock).not.toHaveBeenCalled();
+  });
+
+  it("rejects unauthenticated alias updates before DB access", async () => {
+    mocks.requireUserForActionMock.mockRejectedValue(new Error("Unauthorized"));
+
+    await expect(updateAliasAction({ id: aliasId, archived: true })).rejects.toThrow(
+      "Unauthorized"
+    );
+
+    expect(mocks.getDbMock).not.toHaveBeenCalled();
+  });
+
   it("returns not found when alias update touches no rows", async () => {
     const { db } = createUpdateDb([]);
     mocks.getDbMock.mockReturnValue(db);

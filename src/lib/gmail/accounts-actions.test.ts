@@ -149,6 +149,16 @@ describe("gmail account actions", () => {
     expect(mocks.transactionMock).not.toHaveBeenCalled();
   });
 
+  it("rejects unauthenticated account creation before DB access", async () => {
+    mocks.requireUserForActionMock.mockRejectedValue(new Error("Unauthorized"));
+
+    await expect(
+      createGmailAccountAction({}, createForm("ren.di@gmail.com"))
+    ).rejects.toThrow("Unauthorized");
+
+    expect(mocks.getDbMock).not.toHaveBeenCalled();
+  });
+
   it("rejects plus addressing without opening a transaction", async () => {
     createMockDb();
 

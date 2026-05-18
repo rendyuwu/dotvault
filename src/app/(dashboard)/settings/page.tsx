@@ -1,9 +1,12 @@
 "use client";
 
+import { useActionState, useState } from "react";
 import { Info, User, Lock, ShieldCheck, Ban, Download, Upload } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth/auth-context";
+import { changePasswordAction } from "@/lib/auth/actions";
+import { initialChangePasswordActionState } from "@/lib/auth/action-state";
 
 const APP_VERSION = "0.1.0";
 const APP_ENVIRONMENT = "Development (Mock Data)";
@@ -51,6 +54,101 @@ function InfoRow({ label, value }: { label: string; value: string }) {
   );
 }
 
+function ChangePasswordForm() {
+  const [state, formAction, isPending] = useActionState(
+    changePasswordAction,
+    initialChangePasswordActionState
+  );
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const validationError =
+    newPassword && newPassword.length < 12
+      ? "New password must be at least 12 characters"
+      : confirmPassword && newPassword !== confirmPassword
+        ? "New passwords do not match"
+        : null;
+
+  return (
+    <form action={formAction} className="space-y-3">
+      <div className="flex flex-col gap-1.5">
+        <label
+          htmlFor="currentPassword"
+          className="text-xs text-[var(--color-text-dim)]"
+        >
+          Current Password
+        </label>
+        <input
+          id="currentPassword"
+          name="currentPassword"
+          type="password"
+          required
+          autoComplete="current-password"
+          placeholder="••••••••"
+          className="h-9 rounded-lg border border-[var(--color-border)] bg-[var(--color-base)] px-3 text-sm text-[var(--color-text)] placeholder:text-[var(--color-muted)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
+        />
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="flex flex-col gap-1.5">
+          <label
+            htmlFor="newPassword"
+            className="text-xs text-[var(--color-text-dim)]"
+          >
+            New Password
+          </label>
+          <input
+            id="newPassword"
+            name="newPassword"
+            type="password"
+            required
+            minLength={12}
+            autoComplete="new-password"
+            value={newPassword}
+            onChange={(event) => setNewPassword(event.target.value)}
+            placeholder="••••••••"
+            className="h-9 rounded-lg border border-[var(--color-border)] bg-[var(--color-base)] px-3 text-sm text-[var(--color-text)] placeholder:text-[var(--color-muted)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
+          />
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <label
+            htmlFor="confirmPassword"
+            className="text-xs text-[var(--color-text-dim)]"
+          >
+            Confirm Password
+          </label>
+          <input
+            id="confirmPassword"
+            name="confirmPassword"
+            type="password"
+            required
+            minLength={12}
+            autoComplete="new-password"
+            value={confirmPassword}
+            onChange={(event) => setConfirmPassword(event.target.value)}
+            placeholder="••••••••"
+            className="h-9 rounded-lg border border-[var(--color-border)] bg-[var(--color-base)] px-3 text-sm text-[var(--color-text)] placeholder:text-[var(--color-muted)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
+          />
+        </div>
+      </div>
+
+      {(validationError || state.error || state.success) && (
+        <p
+          className={state.success ? "text-sm text-green-400" : "text-sm text-red-400"}
+          role="alert"
+        >
+          {validationError ?? state.error ?? state.success}
+        </p>
+      )}
+
+      <div className="flex justify-end pt-1">
+        <Button type="submit" variant="primary" disabled={isPending || Boolean(validationError)}>
+          {isPending ? "Updating..." : "Update Password"}
+        </Button>
+      </div>
+    </form>
+  );
+}
+
 export default function SettingsPage() {
   const { user } = useAuth();
 
@@ -85,63 +183,7 @@ export default function SettingsPage() {
 
       <Card>
         <SectionHeader icon={Lock} title="Change Password" />
-        <div className="space-y-3">
-          <div className="flex flex-col gap-1.5">
-            <label
-              htmlFor="current-password"
-              className="text-xs text-[var(--color-text-dim)]"
-            >
-              Current Password
-            </label>
-            <input
-              id="current-password"
-              type="password"
-              disabled
-              placeholder="••••••••"
-              className="h-9 rounded-lg border border-[var(--color-border)] bg-[var(--color-base)] px-3 text-sm text-[var(--color-text)] placeholder:text-[var(--color-muted)] disabled:opacity-50 disabled:cursor-not-allowed"
-            />
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="flex flex-col gap-1.5">
-              <label
-                htmlFor="new-password"
-                className="text-xs text-[var(--color-text-dim)]"
-              >
-                New Password
-              </label>
-              <input
-                id="new-password"
-                type="password"
-                disabled
-                placeholder="••••••••"
-                className="h-9 rounded-lg border border-[var(--color-border)] bg-[var(--color-base)] px-3 text-sm text-[var(--color-text)] placeholder:text-[var(--color-muted)] disabled:opacity-50 disabled:cursor-not-allowed"
-              />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <label
-                htmlFor="confirm-password"
-                className="text-xs text-[var(--color-text-dim)]"
-              >
-                Confirm Password
-              </label>
-              <input
-                id="confirm-password"
-                type="password"
-                disabled
-                placeholder="••••••••"
-                className="h-9 rounded-lg border border-[var(--color-border)] bg-[var(--color-base)] px-3 text-sm text-[var(--color-text)] placeholder:text-[var(--color-muted)] disabled:opacity-50 disabled:cursor-not-allowed"
-              />
-            </div>
-          </div>
-          <div className="flex items-center justify-between pt-1">
-            <p className="text-xs italic text-[var(--color-muted)]">
-              Available when change password is implemented.
-            </p>
-            <Button variant="primary" disabled>
-              Update Password
-            </Button>
-          </div>
-        </div>
+        <ChangePasswordForm />
       </Card>
 
       <Card>

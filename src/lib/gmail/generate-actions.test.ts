@@ -363,6 +363,25 @@ describe("generate actions", () => {
     expect(db.insertMock).not.toHaveBeenCalled();
   });
 
+  it("rejects unauthenticated save requests before DB access", async () => {
+    mocks.requireUserForActionMock.mockRejectedValue(new Error("Unauthorized"));
+
+    await expect(
+      saveGeneratedAliasesAction({
+        gmailAccountId: accountId,
+        aliases: [
+          {
+            localPartWithDots: "a.bc",
+            aliasEmail: "a.bc@gmail.com",
+            dotCount: 1,
+          },
+        ],
+      })
+    ).rejects.toThrow("Unauthorized");
+
+    expect(mocks.getDbMock).not.toHaveBeenCalled();
+  });
+
   it("rejects invalid preview aliases before insert", async () => {
     const db = createSaveDb({ accountRows: [mockAccount()] });
     mocks.getDbMock.mockReturnValue(db.db);
@@ -379,6 +398,46 @@ describe("generate actions", () => {
         ],
       })
     ).resolves.toEqual({ ok: false, error: "Invalid preview aliases" });
+
+    expect(db.insertMock).not.toHaveBeenCalled();
+  });
+
+  it("rejects preview aliases with mismatched email or dot count before insert", async () => {
+    const db = createSaveDb({ accountRows: [mockAccount()] });
+    mocks.getDbMock.mockReturnValue(db.db);
+
+    await expect(
+      saveGeneratedAliasesAction({
+        gmailAccountId: accountId,
+        aliases: [
+          {
+            localPartWithDots: "a.bc",
+            aliasEmail: "ab.c@gmail.com",
+            dotCount: 2,
+          },
+        ],
+      })
+    ).resolves.toEqual({ ok: false, error: "Invalid preview aliases" });
+
+    expect(db.insertMock).not.toHaveBeenCalled();
+  });
+
+  it("rejects archived accounts before saving aliases", async () => {
+    const db = createSaveDb({ accountRows: [] });
+    mocks.getDbMock.mockReturnValue(db.db);
+
+    await expect(
+      saveGeneratedAliasesAction({
+        gmailAccountId: accountId,
+        aliases: [
+          {
+            localPartWithDots: "a.bc",
+            aliasEmail: "a.bc@gmail.com",
+            dotCount: 1,
+          },
+        ],
+      })
+    ).resolves.toEqual({ ok: false, error: "Gmail account not found" });
 
     expect(db.insertMock).not.toHaveBeenCalled();
   });

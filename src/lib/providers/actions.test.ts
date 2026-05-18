@@ -205,6 +205,22 @@ describe("provider actions", () => {
     );
   });
 
+  it("rejects invalid provider input before DB access", async () => {
+    await expect(createProviderAction({ name: "   " })).resolves.toEqual({
+      error: "Provider name is required",
+    });
+
+    expect(mocks.getDbMock).not.toHaveBeenCalled();
+  });
+
+  it("rejects unauthenticated provider creation before DB access", async () => {
+    mocks.requireUserForActionMock.mockRejectedValue(new Error("Unauthorized"));
+
+    await expect(createProviderAction({ name: "GitHub" })).rejects.toThrow("Unauthorized");
+
+    expect(mocks.getDbMock).not.toHaveBeenCalled();
+  });
+
   it("rejects active provider names case-insensitively before insert", async () => {
     const { db } = createInsertDb([], [{ id: providerId }]);
     mocks.getDbMock.mockReturnValue(db);
