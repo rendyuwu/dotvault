@@ -1,30 +1,40 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { AlertTriangle, Check, Link2, X } from "lucide-react";
-import { useGmailAccounts } from "@/lib/mock-data/gmail-accounts-context";
-import { useProviders } from "@/lib/mock-data/providers-context";
+import {
+  createAliasProviderLinkAction,
+  type AliasLinkOption,
+  type AliasProviderLinkOption,
+  type ProviderLinkOption,
+} from "@/lib/alias-provider-links/actions";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
 interface LinkAliasProviderModalProps {
   mode: "link-provider" | "link-alias";
+  aliases: AliasLinkOption[];
+  providers: ProviderLinkOption[];
+  existingLinks: AliasProviderLinkOption[];
   fixedAliasId?: string;
   fixedProviderId?: string;
   onClose: () => void;
-  onSuccess: () => void;
+  onSuccess?: () => void;
 }
 
 export function LinkAliasProviderModal({
   mode,
+  aliases,
+  providers,
+  existingLinks,
   fixedAliasId,
   fixedProviderId,
   onClose,
   onSuccess,
 }: LinkAliasProviderModalProps) {
-  const { aliases, accounts } = useGmailAccounts();
-  const { providers, addLink, isDuplicateLink } = useProviders();
-
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
   const [selectedAliasId, setSelectedAliasId] = useState(fixedAliasId ?? "");
   const [selectedProviderId, setSelectedProviderId] = useState(
     fixedProviderId ?? ""
@@ -32,33 +42,40 @@ export function LinkAliasProviderModal({
   const [accountIdentifier, setAccountIdentifier] = useState("");
   const [notes, setNotes] = useState("");
   const [success, setSuccess] = useState(false);
-
-  const activeAliases = useMemo(
-    () => aliases.filter((a) => !a.archived),
-    [aliases]
-  );
-  const activeProviders = useMemo(
-    () => providers.filter((p) => !p.archived),
-    [providers]
-  );
+  const [error, setError] = useState<string | null>(null);
 
   const aliasesByAccount = useMemo(() => {
-    const grouped: Record<string, typeof activeAliases> = {};
-    for (const alias of activeAliases) {
+    const grouped: Record<string, AliasLinkOption[]> = {};
+    for (const alias of aliases) {
       const accountId = alias.gmailAccountId;
       if (!grouped[accountId]) grouped[accountId] = [];
       grouped[accountId].push(alias);
     }
     return grouped;
-  }, [activeAliases]);
+  }, [aliases]);
 
   const isDuplicate = useMemo(() => {
     if (!selectedAliasId || !selectedProviderId) return false;
-    return isDuplicateLink(selectedAliasId, selectedProviderId);
-  }, [selectedAliasId, selectedProviderId, isDuplicateLink]);
+    return existingLinks.some(
+      (link) =>
+        link.aliasId === selectedAliasId &&
+        link.providerId === selectedProviderId &&
+        !link.archived
+    );
+  }, [existingLinks, selectedAliasId, selectedProviderId]);
+
+  const hasArchivedLink = useMemo(() => {
+    if (!selectedAliasId || !selectedProviderId) return false;
+    return existingLinks.some(
+      (link) =>
+        link.aliasId === selectedAliasId &&
+        link.providerId === selectedProviderId &&
+        link.archived
+    );
+  }, [existingLinks, selectedAliasId, selectedProviderId]);
 
   const canSubmit =
-    selectedAliasId && selectedProviderId && !isDuplicate && !success;
+    selectedAliasId && selectedProviderId && !isDuplicate && !success && !isPending;
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -68,25 +85,34 @@ export function LinkAliasProviderModal({
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [onClose]);
 
-  function handleSubmit() {
-    if (!canSubmit) return;
-    const result = addLink({
-      aliasId: selectedAliasId,
-      providerId: selectedProviderId,
-      accountIdentifier: accountIdentifier.trim() || null,
-      notes: notes.trim() || null,
-    });
-    if (result) {
-      setSuccess(true);
-      setTimeout(() => {
-        onSuccess();
-        onClose();
-      }, 1000);
-    }
+  function getAccountLabel(gmailAccountId: string) {
+    return aliases.find((a) => a.gmailAccountId === gmailAccountId)?.accountLabel ?? "Unknown";
   }
 
-  function getAccountLabel(gmailAccountId: string) {
-    return accounts.find((a) => a.id === gmailAccountId)?.label ?? "Unknown";
+  function handleSubmit() {
+    if (!canSubmit) return;
+    setError(null);
+
+    startTransition(async () => {
+      const result = await createAliasProviderLinkAction({
+        aliasId: selectedAliasId,
+        providerId: selectedProviderId,
+        accountIdentifier,
+        notes,
+      });
+
+      if (result.error) {
+        setError(result.error);
+        return;
+      }
+
+      setSuccess(true);
+      router.refresh();
+      window.setTimeout(() => {
+        onSuccess?.();
+        onClose();
+      }, 700);
+    });
   }
 
   return (
@@ -126,6 +152,12 @@ export function LinkAliasProviderModal({
           </div>
         ) : (
           <div className="space-y-4">
+            {error && (
+              <p className="rounded-lg border border-red-400/30 bg-red-400/10 px-3 py-2 text-sm text-red-300" role="alert">
+                {error}
+              </p>
+            )}
+
             {mode === "link-provider" ? (
               <div className="flex flex-col gap-1.5">
                 <label
@@ -141,10 +173,10 @@ export function LinkAliasProviderModal({
                   className="h-9 rounded-lg border border-[var(--color-border)] bg-[var(--color-base)] px-3 text-sm text-[var(--color-text)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
                 >
                   <option value="">Select a provider...</option>
-                  {activeProviders.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name}
-                      {p.category ? ` (${p.category})` : ""}
+                  {providers.map((provider) => (
+                    <option key={provider.id} value={provider.id}>
+                      {provider.name}
+                      {provider.category ? ` (${provider.category})` : ""}
                     </option>
                   ))}
                 </select>
@@ -166,13 +198,10 @@ export function LinkAliasProviderModal({
                   <option value="">Select an alias...</option>
                   {Object.entries(aliasesByAccount).map(
                     ([accountId, accountAliases]) => (
-                      <optgroup
-                        key={accountId}
-                        label={getAccountLabel(accountId)}
-                      >
-                        {accountAliases.map((a) => (
-                          <option key={a.id} value={a.id}>
-                            {a.aliasEmail}
+                      <optgroup key={accountId} label={getAccountLabel(accountId)}>
+                        {accountAliases.map((alias) => (
+                          <option key={alias.id} value={alias.id}>
+                            {alias.aliasEmail}
                           </option>
                         ))}
                       </optgroup>
@@ -190,6 +219,14 @@ export function LinkAliasProviderModal({
                 />
                 <span className="text-xs text-[var(--color-secondary)]">
                   This alias is already linked to this provider.
+                </span>
+              </div>
+            )}
+
+            {hasArchivedLink && !isDuplicate && (
+              <div className="flex items-center gap-2 rounded-lg border border-[var(--color-accent)]/30 bg-[var(--color-accent)]/5 px-3 py-2">
+                <span className="text-xs text-[var(--color-accent)]">
+                  This will restore a previously removed link.
                 </span>
               </div>
             )}
@@ -228,7 +265,7 @@ export function LinkAliasProviderModal({
             </div>
 
             <div className="flex gap-2 justify-end pt-2">
-              <Button variant="ghost" onClick={onClose}>
+              <Button variant="ghost" onClick={onClose} disabled={isPending}>
                 Cancel
               </Button>
               <Button
@@ -237,7 +274,7 @@ export function LinkAliasProviderModal({
                 disabled={!canSubmit}
               >
                 <Link2 size={14} className="mr-1" />
-                Create Link
+                {hasArchivedLink ? "Restore Link" : "Create Link"}
               </Button>
             </div>
           </div>
