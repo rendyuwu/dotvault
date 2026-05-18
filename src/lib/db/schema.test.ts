@@ -52,4 +52,12 @@ describe("database schema", () => {
       'CREATE UNIQUE INDEX "alias_provider_links_user_alias_provider_unique" ON "alias_provider_links" USING btree ("user_id","alias_id","provider_id")'
     );
   });
+
+  it("stores original alias fields for Gmail account creation", () => {
+    const migration = readInitialMigration();
+
+    expect(migration).toContain('"gmail_account_id" uuid NOT NULL');
+    expect(migration).toContain('"dot_count" integer NOT NULL');
+    expect(migration).toContain('"is_original" boolean DEFAULT false NOT NULL');
+  });
 });
