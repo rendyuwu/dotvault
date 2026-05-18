@@ -8,12 +8,7 @@ Create backup directory on host:
 mkdir -p backups
 ```
 
-Run `pg_dump` through Compose network:
-```bash
-docker compose exec -T postgres pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" --format=custom --no-owner --no-acl > backups/dotvault-$(date +%Y%m%d-%H%M%S).dump
-```
-
-Alternative with env sourced by shell:
+Source `.env`, then run `pg_dump` through Compose network:
 ```bash
 set -a
 . ./.env
