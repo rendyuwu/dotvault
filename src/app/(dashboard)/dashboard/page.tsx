@@ -1,21 +1,14 @@
-"use client";
-
 import { Mail, AtSign, Building2, Link2 } from "lucide-react";
-import { useAuth } from "@/lib/auth/auth-context";
-import {
-  mockGmailAccounts,
-  mockAliases,
-  mockProviders,
-  mockAliasProviderLinks,
-} from "@/lib/mock-data";
 import { SummaryCard } from "@/components/dashboard/summary-card";
 import { QuickActions } from "@/components/dashboard/quick-actions";
+import { requireUser } from "@/lib/auth/server";
+import { getDashboardSummary } from "@/lib/dashboard/actions";
 
-export default function DashboardPage() {
-  const { user } = useAuth();
-
-  const activeAliases = mockAliases.filter((a) => !a.archived);
-  const archivedAliases = mockAliases.filter((a) => a.archived);
+export default async function DashboardPage() {
+  const [user, summary] = await Promise.all([
+    requireUser(),
+    getDashboardSummary(),
+  ]);
 
   return (
     <div className="space-y-8">
@@ -31,26 +24,26 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <SummaryCard
           title="Gmail Accounts"
-          count={mockGmailAccounts.length}
+          count={summary.gmailAccountCount}
           icon={Mail}
           href="/gmail-accounts"
         />
         <SummaryCard
           title="Aliases"
-          count={activeAliases.length}
-          subtitle={`${archivedAliases.length} archived`}
+          count={summary.activeAliasCount}
+          subtitle={`${summary.archivedAliasCount} archived`}
           icon={AtSign}
           href="/aliases"
         />
         <SummaryCard
           title="Providers"
-          count={mockProviders.length}
+          count={summary.activeProviderCount}
           icon={Building2}
           href="/providers"
         />
         <SummaryCard
           title="Links"
-          count={mockAliasProviderLinks.length}
+          count={summary.activeAliasProviderLinkCount}
           icon={Link2}
           href="/aliases"
         />

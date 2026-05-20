@@ -216,6 +216,7 @@ describe("gmail account actions", () => {
       archived: false,
     });
     expect(mocks.revalidatePathMock).toHaveBeenCalledWith("/gmail-accounts");
+    expect(mocks.revalidatePathMock).toHaveBeenCalledWith("/dashboard");
   });
 
   it("rejects duplicate canonical accounts from insert conflict", async () => {
@@ -295,6 +296,7 @@ describe("gmail account actions", () => {
     expect(updatePayload).not.toHaveProperty("canonicalEmail");
     expect(updatePayload).not.toHaveProperty("userId");
     expect(mocks.revalidatePathMock).toHaveBeenCalledWith("/gmail-accounts");
+    expect(mocks.revalidatePathMock).toHaveBeenCalledWith("/dashboard");
   });
 
   it("returns not found when scoped patch updates no rows", async () => {
