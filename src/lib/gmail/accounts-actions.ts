@@ -162,6 +162,7 @@ export async function createGmailAccountAction(
   }
 
   revalidatePath("/gmail-accounts");
+  revalidatePath("/dashboard");
   redirect("/gmail-accounts");
 }
 
@@ -196,5 +197,6 @@ export async function updateGmailAccountAction(
   if (!updated) return { error: "Gmail account not found" };
 
   revalidatePath("/gmail-accounts");
+  revalidatePath("/dashboard");
   return {};
 }
